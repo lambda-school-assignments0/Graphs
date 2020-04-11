@@ -92,7 +92,6 @@ class Graph:
         """
         # define helper function for recursion
         def dft_recursive_helper(starting_vertex, visited = set()):
-            # base case
             if starting_vertex not in visited:
                 visited.add(starting_vertex)
                 return [starting_vertex] + sum([dft_recursive_helper(vertex, visited) for vertex in self.get_neighbors(starting_vertex)], [])
@@ -107,30 +106,28 @@ class Graph:
         starting_vertex to destination_vertex in
         breath-first order.
         """
+        # initialize path taken and visited dictionary (sets do not usually preserve order)
+        path = [starting_vertex]
+        visited = set()
+        visited.add(starting_vertex)
+
         # initialize queue with starting_vertex
         queue = Queue()
-        queue.enqueue(starting_vertex)
-
-        # initialize path taken and visited dictionary (sets do not usually preserve order)
-        path = []
-        visited = set()
+        queue.enqueue(path)
 
         # keep running loop until queue is empty
         while queue.size() != 0:
-            current_node = queue.dequeue()
+            current_path = queue.dequeue()
 
-            # prevent infinite looping
-            if current_node not in visited:
-                path.append(current_node)
-                visited.add(current_node)
+            if current_path[-1] == destination_vertex:
+                return current_path
             
-                # add neighbors of current_node to queue
-                for vertex in self.get_neighbors(current_node):
-                    queue.enqueue(vertex)
-                    if vertex == destination_vertex:
-                        break
-        
-        return path
+            # add neighbors of current_node to queue
+            for vertex in self.get_neighbors(current_path[-1]):
+                if vertex not in visited:
+                    queue.enqueue(current_path + [vertex])
+
+        return -1
 
     def dfs(self, starting_vertex, destination_vertex):
         """
@@ -138,30 +135,28 @@ class Graph:
         starting_vertex to destination_vertex in
         depth-first order.
         """
-        # initialize stack with starting vertex
-        stack = Stack()
-        stack.push(starting_vertex)
-
         # initialize path taken and visited dictionary (sets do not usually preserve order)
-        path = []
+        path = [starting_vertex]
         visited = set()
+        visited.add(starting_vertex)
 
-        # keep running loop until stack is empty
+        # initialize queue with starting_vertex
+        stack = Stack()
+        stack.push(path)
+
+        # keep running loop until queue is empty
         while stack.size() != 0:
-            current_node = stack.pop()
+            current_path = stack.pop()
 
-            # prevent infinite looping
-            if current_node not in visited:
-                path.append(current_node)
-                visited.add(current_node)
-                if current_node == destination_vertex:
-                        break
+            if current_path[-1] == destination_vertex:
+                return current_path
+            
+            # add neighbors of current_node to stack
+            for vertex in self.get_neighbors(current_path[-1]):
+                if vertex not in visited:
+                    stack.push(current_path + [vertex])
 
-                # add neighbors of current_node to stack
-                for vertex in self.get_neighbors(current_node):
-                    stack.push(vertex)
-
-        return path
+        return -1
 
     def dfs_recursive(self, starting_vertex, destination_vertex):
         """
