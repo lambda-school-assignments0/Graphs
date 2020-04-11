@@ -111,7 +111,7 @@ class Graph:
         visited = set()
         visited.add(starting_vertex)
 
-        # initialize queue with starting_vertex
+        # initialize queue with path
         queue = Queue()
         queue.enqueue(path)
 
