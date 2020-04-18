@@ -1,3 +1,7 @@
+import random
+import time
+from util import Queue
+
 class User:
     def __init__(self, name):
         self.name = name
@@ -45,8 +49,48 @@ class SocialGraph:
         # !!!! IMPLEMENT ME
 
         # Add users
+        for name in range(num_users):
+            self.add_user(name)
+
+        # Make a list of all possible friendships
+        friendships_to_add = []
+        for user in range(1, self.last_id + 1):
+            for friend in range(user + 1, self.last_id + 1):
+                friendships_to_add.append((user, friend))
+
+        # Shuffle the list (Fisher-Yates shuffle)
+        for idx in range(len(friendships_to_add)):
+            rand_idx = random.randint(0, len(friendships_to_add) - 1)
+            friendships_to_add[idx], friendships_to_add[rand_idx] = friendships_to_add[rand_idx], friendships_to_add[idx]
 
         # Create friendships
+        pairs_needed = num_users * avg_friendships // 2
+        for user, friend in friendships_to_add[:pairs_needed]:
+            self.add_friendship(user, friend)
+
+    def populate_graph_linear(self, num_users, avg_friendships):
+        # Reset graph
+        self.last_id = 0
+        self.users = {}
+        self.friendships = {}
+
+        # Add users
+        for name in range(num_users):
+            self.add_user(name)
+
+        # Create friendships
+        friendships_added = 0
+        pairs_needed = num_users * avg_friendships // 2
+        while friendships_added < pairs_needed:
+            user_id = random.randint(1, self.last_id)
+            friend_id = random.randint(1, self.last_id)
+            if user_id != friend_id and friend_id not in self.friendships[user_id]:
+                self.add_friendship(user_id, friend_id)
+                friendships_added += 1
+
+            # find random friend_id out of remaining available id's
+            # print(self.friendships[user_id])
+            # friendships_added += 1
 
     def get_all_social_paths(self, user_id):
         """
@@ -59,6 +103,17 @@ class SocialGraph:
         """
         visited = {}  # Note that this is a dictionary, not a set
         # !!!! IMPLEMENT ME
+        path = [user_id]
+        queue = Queue()
+        queue.enqueue(path)
+        while queue.size() > 0:
+            current_path = queue.dequeue()
+            if current_path[-1] not in visited:
+                visited[current_path[-1]] = current_path
+
+            for friend in self.friendships[current_path[-1]]:
+                if friend not in visited:
+                    queue.enqueue(current_path + [friend])
         return visited
 
 
@@ -68,3 +123,27 @@ if __name__ == '__main__':
     print(sg.friendships)
     connections = sg.get_all_social_paths(1)
     print(connections)
+
+    # Question #2
+    sg.populate_graph(1000, 5)
+    connections = sg.get_all_social_paths(1)
+
+    degree_of_separation_sum = 0
+    for key in connections:
+        degree_of_separation_sum += len(connections[key])
+    degree_of_separation_avg = degree_of_separation_sum / len(connections)
+    print(f"Avg. degree of separation between user and network = {degree_of_separation_avg}")
+
+    # Stretch Goal #2
+    start = time.time()
+    sg.populate_graph(1000, 20)
+    end = time.time()
+    
+    print(f"O(n^2) time elapsed: {end - start}")
+
+    start = time.time()
+    sg.populate_graph_linear(1000, 20)
+    end = time.time()
+    linear = end - start
+    print(f"  O(n) time elapsed: {linear}")
+
