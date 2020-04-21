@@ -55,6 +55,9 @@ If all paths have been explored, you're done!
 
 It is very difficult to calculate the shortest possible path that traverses the entire graph. Why?
 
+It requires finding all the shorter branches and leaving the longest branch
+last so you'll only have to traverse it once and not backtrack
+
 My best path is 957 moves. Can you find a shorter path?
 
 
